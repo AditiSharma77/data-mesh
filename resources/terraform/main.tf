@@ -22,3 +22,7 @@ resource "nomad_job" "sqlpad" {
   jobspec = file("${path.cwd}/../nomad-jobs/sqlpad.hcl")
   detach = false
 }
+resource "nomad_job" "nifi" {
+  jobspec = file("${path.cwd}/../nomad-jobs/nifi.hcl")
+  detach = false
+}

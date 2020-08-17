@@ -1,24 +1,24 @@
-job "nifi" {
+job "nifiregistry" {
 
   datacenters = ["dc1"]
   type = "service"
 
   group "servers" {
     count = 1
-    task "nifi" {
+    task "nifi-registry" {
       driver = "docker"
 
       config {
-        image = "apache/nifi:1.11.4"
+        image = "apache/nifi-registry:0.6.0"
         //image = "${harbor}/nifi/nifi:latest"
 
         port_map {
-          nifi = 8999
+          nifiregistry = 10000
         }
       }
 
       service {
-        port = "nifi"
+        port = "nifiregistry"
 
 
       }
@@ -30,7 +30,7 @@ job "nifi" {
         network {
           mbits = 100
 
-          port "nifi" {
+          port "nifiregistry" {
           }
         }
       }
