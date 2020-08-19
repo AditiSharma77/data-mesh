@@ -36,6 +36,9 @@ connect-to-hue: copy-consul
 	consul connect proxy -service user -upstream hue-server:8888 -log-level debug
 connect-to-sqlpad: copy-consul
 	consul connect proxy -service user -upstream sqlpad-server:3000 -log-level debug
+connect-to-nifi: copy-consul
+	consul connect proxy -service user -upstream nifi-server:8999 -log-level debug
+
 
 download-presto-cli:
 	wget https://repo1.maven.org/maven2/io/prestosql/presto-cli/${PRESTO_VERSION}/presto-cli-${PRESTO_VERSION}-executable.jar

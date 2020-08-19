@@ -1,18 +1,44 @@
 job "nifi" {
-
   datacenters = ["dc1"]
   type = "service"
-
-  group "servers" {
+  update {
+    max_parallel      = 1
+    health_check      = "checks"
+    min_healthy_time  = "10s"
+    healthy_deadline  = "12m"
+    progress_deadline = "15m"
+    auto_revert       = true
+    auto_promote      = true
+    canary            = 1
+    stagger           = "30s"
+  }
+  group "nifi" {
     count = 1
+
+    network {
+      mode = "bridge"
+    }
+    service {
+      name = "nifi"
+      port = 8999
+      connect {
+        sidecar_service {
+          proxy {
+            upstreams {
+              destination_name = "minio"
+              local_bind_port = 9000
+            }
+          }
+        }
+      }
+
+    }
     task "nifi" {
       driver = "docker"
-
       config {
         image = "apache/nifi:1.11.4"
         //image = "${harbor}/nifi/nifi:latest"
         volumes = [
-
           "local/conf/nifi.properties:/local/conf/nifi.properties",
         ]
       }
@@ -31,35 +57,19 @@ job "nifi" {
         nifi.content.claim.max.appendable.size=1 MB
         nifi.content.claim.max.flow.files=1000
 # S3 specific settings
-nifi.content.repository.s3_endpoint=http://{{ env "NOMAD_UPSTREAM_ADDR_minio" }}
-nifi.content.repository.s3_access_key={{ env "MINIO_ACCESS_KEY" }}
-nifi.content.repository.s3_secret_key={{ env "MINIO_SECRET_KEY" }}
-nifi.content.repository.s3_ssl_enabled=true
-nifi.content.repository.s3_path_style_access=true
-nifi.content.repository.s3_cache=10000
-nifi.content.repository.directory.default=/nifiminio
-nifi.content.repository.archive.enabled=true
-nifi.content.viewer.url=../nifi-content-viewer/
+        nifi.content.repository.s3_endpoint=http://{{ env "NOMAD_UPSTREAM_ADDR_minio" }}
+        nifi.content.repository.s3_access_key={{ env "MINIO_ACCESS_KEY" }}
+        nifi.content.repository.s3_secret_key={{ env "MINIO_SECRET_KEY" }}
+        nifi.content.repository.s3_ssl_enabled=true
+        nifi.content.repository.s3_path_style_access=true
+        nifi.content.repository.s3_cache=10000
+        nifi.content.repository.directory.default=/nifiminio
+        nifi.content.repository.archive.enabled=true
+        nifi.content.viewer.url=../nifi-content-viewer/
 EOH
       }
 
       }
-
-      service {
-        name = "nifi"
-        port = 8999
-        connect {
-          sidecar_service {
-            proxy {
-              upstreams {
-                destination_name = "minio"
-                local_bind_port = 9000
-              }
-            }
-          }
-        }
-
-      }
-    }
+  }
 
 }
