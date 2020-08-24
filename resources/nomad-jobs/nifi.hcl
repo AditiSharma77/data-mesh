@@ -31,14 +31,20 @@ job "nifi" {
           }
         }
       }
-
+      check {
+        expose   = true
+        name     = "nifi"
+        type     = "http"
+        path     = "/"
+        interval = "10s"
+        timeout  = "2s"
+      }
     }
     task "nifi" {
       driver = "docker"
       config {
-        image = "apache/nifi:1.11.4"
-        //image = "${harbor}/nifi/nifi:latest"
-        volumes = [
+        image = "apache/nifi:1.11.3"
+       volumes = [
           "local/conf/nifi.properties:/local/conf/nifi.properties",
         ]
       }
@@ -61,15 +67,11 @@ job "nifi" {
         nifi.content.repository.s3_access_key={{ env "MINIO_ACCESS_KEY" }}
         nifi.content.repository.s3_secret_key={{ env "MINIO_SECRET_KEY" }}
         nifi.content.repository.s3_ssl_enabled=true
-        nifi.content.repository.s3_path_style_access=true
-        nifi.content.repository.s3_cache=10000
-        nifi.content.repository.directory.default=/nifiminio
-        nifi.content.repository.archive.enabled=true
-        nifi.content.viewer.url=../nifi-content-viewer/
+
 EOH
+      }
       }
 
       }
   }
 
-}
